@@ -44,173 +44,7 @@ First, let's import the data set and delete any rows with missing data. Afterwar
 
 ```python
 #Your code here; load the dataset and drop rows with missing values. Then preview the data.
-data = pd.read_csv("dataset_Facebook.csv", sep = ";", header=0)
-data = data.dropna()
-print(np.shape(data))
-data.head()
 ```
-
-    (495, 19)
-
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Page total likes</th>
-      <th>Type</th>
-      <th>Category</th>
-      <th>Post Month</th>
-      <th>Post Weekday</th>
-      <th>Post Hour</th>
-      <th>Paid</th>
-      <th>Lifetime Post Total Reach</th>
-      <th>Lifetime Post Total Impressions</th>
-      <th>Lifetime Engaged Users</th>
-      <th>Lifetime Post Consumers</th>
-      <th>Lifetime Post Consumptions</th>
-      <th>Lifetime Post Impressions by people who have liked your Page</th>
-      <th>Lifetime Post reach by people who like your Page</th>
-      <th>Lifetime People who have liked your Page and engaged with your post</th>
-      <th>comment</th>
-      <th>like</th>
-      <th>share</th>
-      <th>Total Interactions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>139441</td>
-      <td>Photo</td>
-      <td>2</td>
-      <td>12</td>
-      <td>4</td>
-      <td>3</td>
-      <td>0.0</td>
-      <td>2752</td>
-      <td>5091</td>
-      <td>178</td>
-      <td>109</td>
-      <td>159</td>
-      <td>3078</td>
-      <td>1640</td>
-      <td>119</td>
-      <td>4</td>
-      <td>79.0</td>
-      <td>17.0</td>
-      <td>100</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>139441</td>
-      <td>Status</td>
-      <td>2</td>
-      <td>12</td>
-      <td>3</td>
-      <td>10</td>
-      <td>0.0</td>
-      <td>10460</td>
-      <td>19057</td>
-      <td>1457</td>
-      <td>1361</td>
-      <td>1674</td>
-      <td>11710</td>
-      <td>6112</td>
-      <td>1108</td>
-      <td>5</td>
-      <td>130.0</td>
-      <td>29.0</td>
-      <td>164</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>139441</td>
-      <td>Photo</td>
-      <td>3</td>
-      <td>12</td>
-      <td>3</td>
-      <td>3</td>
-      <td>0.0</td>
-      <td>2413</td>
-      <td>4373</td>
-      <td>177</td>
-      <td>113</td>
-      <td>154</td>
-      <td>2812</td>
-      <td>1503</td>
-      <td>132</td>
-      <td>0</td>
-      <td>66.0</td>
-      <td>14.0</td>
-      <td>80</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>139441</td>
-      <td>Photo</td>
-      <td>2</td>
-      <td>12</td>
-      <td>2</td>
-      <td>10</td>
-      <td>1.0</td>
-      <td>50128</td>
-      <td>87991</td>
-      <td>2211</td>
-      <td>790</td>
-      <td>1119</td>
-      <td>61027</td>
-      <td>32048</td>
-      <td>1386</td>
-      <td>58</td>
-      <td>1572.0</td>
-      <td>147.0</td>
-      <td>1777</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>139441</td>
-      <td>Photo</td>
-      <td>2</td>
-      <td>12</td>
-      <td>2</td>
-      <td>3</td>
-      <td>0.0</td>
-      <td>7244</td>
-      <td>13594</td>
-      <td>671</td>
-      <td>410</td>
-      <td>580</td>
-      <td>6228</td>
-      <td>3200</td>
-      <td>396</td>
-      <td>19</td>
-      <td>325.0</td>
-      <td>49.0</td>
-      <td>393</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
 
 ## Initialization
 
@@ -242,30 +76,8 @@ Finally, y will simply be the "like" column.
 
 ```python
 #Your code here; define X and y.
-X0 = data["Page total likes"]
-X1 = data["Type"]
-X2 = data["Category"]
-X3 = data["Post Month"]
-X4 = data["Post Weekday"]
-X5 = data["Post Hour"]
-X6 = data["Paid"]
-
-## standardize/categorize
-X0= (X0-np.mean(X0))/(np.std(X0))
-dummy_X1= pd.get_dummies(X1)
-dummy_X2= pd.get_dummies(X2)
-X3= (X3-np.mean(X3))/(np.std(X3))
-X4= (X4-np.mean(X4))/(np.std(X4))
-X5= (X5-np.mean(X5))/(np.std(X5))
-
-X = pd.concat([X0, dummy_X1, dummy_X2, X3, X4, X5, X6], axis=1)
-
-Y = data["like"]
-
-#Note: you get the same result for standardization if you use StandardScaler from sklearn.preprocessing
-#from sklearn.preprocessing import StandardScaler
-#sc = StandardScaler()
-#X0 = sc.fit_transform(X0)
+X = 
+Y = 
 ```
 
 Our data is fairly small. Let's just split the data up in a training set and a validation set!  The next three code blocks are all provided for you; have a quick review but not need to make edits!
@@ -338,33 +150,16 @@ Normalize Y as you did X by subtracting the mean and dividing by the standard de
 
 ```python
 #Your code here: redefine Y after normalizing the data.
-Y = (data["like"]-np.mean(data["like"]))/(np.std(data["like"]))
 ```
 
 
 ```python
 #Your code here; create training and validation sets as before. Use random seed 123.
-data_clean = pd.concat([X, Y], axis=1)
-np.random.seed(123)
-train, validation = train_test_split(data_clean, test_size=0.2)
-
-X_val = validation.iloc[:,0:12]
-Y_val = validation.iloc[:,12]
-X_train = train.iloc[:,0:12]
-Y_train = train.iloc[:,12]
 ```
 
 
 ```python
 #Your code here; rebuild a simple model using a relu layer followed by a linear layer. (See our code snippet above!)
-np.random.seed(123)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
-model.add(layers.Dense(1, activation = 'linear'))
-
-model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val), verbose = 0)
 ```
 
 Finally, let's recheck our loss function. Not only should it be populated with numerical data as opposed to null values, but we also should expect to see the loss function decreasing with successive epochs, demonstrating optimization!
