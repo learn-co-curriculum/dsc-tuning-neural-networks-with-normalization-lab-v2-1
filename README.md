@@ -7,7 +7,7 @@ For this lab on initialization and optimization, let's look at a slightly differ
 
 We can just as well use deep learning networks for linear regression as for a classification problem. Do note that getting regression to work with neural networks is a hard problem because the output is unbounded ($\hat y$ can technically range from $-\infty$ to $+\infty$, and the models are especially prone to exploding gradients. This issue makes a regression exercise the perfect learning case!
 
-## Objectives:
+## Objectives
 You will be able to:
 * Build a nueral network using keras
 * Normalize your data to assist algorithm convergence
