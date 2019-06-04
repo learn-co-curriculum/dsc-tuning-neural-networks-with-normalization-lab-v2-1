@@ -1,5 +1,5 @@
 
-# Normalization and Tuning Neural Networks - Lab
+# Tuning Neural Networks with Normalization - Lab
 
 ## Introduction
 
