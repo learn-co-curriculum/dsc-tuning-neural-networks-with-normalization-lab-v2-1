@@ -366,7 +366,6 @@ hist = model.fit(X_train, Y_train, batch_size=32,
 
 
 ```python
-#Code provided; previewing the loss through successive epochs
 hist.history['loss'][:10]
 ```
 
@@ -378,26 +377,6 @@ hist.history['loss'][:10]
 
 
 > Note that you still haven't achieved convergence! From here, it's time to normalize the output data.
-
-
-```python
-Y_train.head()
-```
-
-
-
-
-    278    202.0
-    80      86.0
-    20      66.0
-    103     13.0
-    220     86.0
-    Name: like, dtype: float64
-
-
-
-Yes, indeed. We didn't normalize them and we should, as they take pretty high values. Let
-s rerun the model but make sure that the output is normalized as well!
 
 ## Normalizing the output
 
