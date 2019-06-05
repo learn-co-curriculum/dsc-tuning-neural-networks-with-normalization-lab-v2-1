@@ -3,9 +3,9 @@
 
 ## Introduction
 
-For this lab on initialization and optimization, let's look at a slightly different type of neural network. This time, we will not perform a classification task as we've done before (Santa vs not santa, bank complaint types), but we'll look at a linear regression problem.
+For this lab on initialization and optimization, you'll build a neural network to perform a regression task.
 
-We can just as well use deep learning networks for linear regression as for a classification problem. Do note that getting regression to work with neural networks is a hard problem because the output is unbounded ($\hat y$ can technically range from $-\infty$ to $+\infty$, and the models are especially prone to exploding gradients. This issue makes a regression exercise the perfect learning case!
+It is worth noting that getting regression to work with neural networks can be difficult because the output is unbounded ($\hat y$ can technically range from $-\infty$ to $+\infty$, and the models are especially prone to exploding gradients. This issue makes a regression exercise the perfect learning case for tinkering with normalization and optimization strategies to ensure proper convergence!
 
 ## Objectives
 You will be able to:
@@ -212,19 +212,11 @@ data.head()
 
 
 
-## Initialization
+## Defining the Problem
 
-## Normalize the Input Data
+Define X and Y and perform a train-validation-test split.
 
-Let's look at our input data. We'll use the 7 first columns as our predictors. We'll do the following two things:
-- Normalize the continuous variables --> you can do this using `np.mean()` and `np.std()`
-- Make dummy variables of the categorical variables (you can do this by using `pd.get_dummies`)
-
-We only count "Category" and "Type" as categorical variables. Note that you can argue that "Post month", "Post Weekday" and "Post Hour" can also be considered categories, but we'll just treat them as being continuous for now.
-
-You'll then use these to define X and Y. 
-
-To summarize, X will be:
+X will be:
 * Page total likes
 * Post Month
 * Post Weekday
@@ -234,14 +226,10 @@ along with dummy variables for:
 * Type
 * Category
 
-
-Be sure to normalize your features by subtracting the mean and dividing by the standard deviation.  
-
-Finally, y will simply be the "like" column.
+Y will be the `like` column.
 
 
 ```python
-#Your code here; define X and y.
 X0 = data["Page total likes"]
 X1 = data["Type"]
 X2 = data["Category"]
@@ -250,17 +238,93 @@ X4 = data["Post Weekday"]
 X5 = data["Post Hour"]
 X6 = data["Paid"]
 
-## standardize/categorize
-X0= (X0-np.mean(X0))/(np.std(X0))
+## Even for a baseline model some preprocessing may be required (all inputs must be numerical features)
 dummy_X1= pd.get_dummies(X1)
 dummy_X2= pd.get_dummies(X2)
-X3= (X3-np.mean(X3))/(np.std(X3))
-X4= (X4-np.mean(X4))/(np.std(X4))
-X5= (X5-np.mean(X5))/(np.std(X5))
 
 X = pd.concat([X0, dummy_X1, dummy_X2, X3, X4, X5, X6], axis=1)
 
 Y = data["like"]
+
+
+data_clean = pd.concat([X, Y], axis=1)
+np.random.seed(123)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=123)  
+X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2, random_state=123)  
+
+# train, validation = train_test_split(data_clean, test_size=0.2)
+
+# X_val = validation.iloc[:,0:12]
+# Y_val = validation.iloc[:,12]
+# X_train = train.iloc[:,0:12]
+# Y_train = train.iloc[:,12]
+```
+
+## Building a Baseline Model
+
+Next, build a naive baseline model to compare performance against is a helpful reference point. From there, you can then observe the impact of various tunning procedures which will iteratively improve your model.
+
+
+```python
+np.random.seed(123)
+model = Sequential()
+model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(1, activation = 'linear'))
+
+model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
+hist = model.fit(X_train, Y_train, batch_size=32, 
+                 epochs=100, validation_data = (X_val, Y_val), verbose=0)
+```
+
+### Evaluating the Baseline
+
+Evaluate the baseline model for the training and validation sets.
+
+
+```python
+pred_train = model.predict(X_train).reshape(-1)
+pred_val = model.predict(X_val).reshape(-1)  
+
+MSE_train = np.mean((pred_train-Y_train)**2)
+MSE_val = np.mean((pred_val-Y_val)**2)
+
+print("MSE_train:", MSE_train)
+print("MSE_val:", MSE_val)
+```
+
+    MSE_train: nan
+    MSE_val: nan
+
+
+
+```python
+hist.history['loss'][:10]
+```
+
+
+
+
+    [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan]
+
+
+
+> Notice this extremely problematic behaviour: all the values for training and validation loss are "nan". This indicates that the algorithm did not converge. The first solution to this is to normalize the input. From there, if convergence is not achieved, normalizing the output may also be required.
+
+## Normalize the Input Data
+
+Normalize the input features by subtracting each feature mean and dividing by the standard deviation in order to transform each into a standard normal distribution. Then recreate the train-validate-test sets with the transformed input data.
+
+
+```python
+## standardize/categorize
+X0= (X0-np.mean(X0))/(np.std(X0))
+
+X3= (X3-np.mean(X3))/(np.std(X3))
+X4= (X4-np.mean(X4))/(np.std(X4))
+X5= (X5-np.mean(X5))/(np.std(X5))
+X6= (X6-np.mean(X6))/(np.std(X6))
+
+X = pd.concat([X0, dummy_X1, dummy_X2, X3, X4, X5, X6], axis=1)
 
 #Note: you get the same result for standardization if you use StandardScaler from sklearn.preprocessing
 #from sklearn.preprocessing import StandardScaler
@@ -268,24 +332,28 @@ Y = data["like"]
 #X0 = sc.fit_transform(X0)
 ```
 
-Our data is fairly small. Let's just split the data up in a training set and a validation set!  The next three code blocks are all provided for you; have a quick review but not need to make edits!
-
 
 ```python
 #Code provided; defining training and validation sets
 data_clean = pd.concat([X, Y], axis=1)
 np.random.seed(123)
-train, validation = train_test_split(data_clean, test_size=0.2)
 
-X_val = validation.iloc[:,0:12]
-Y_val = validation.iloc[:,12]
-X_train = train.iloc[:,0:12]
-Y_train = train.iloc[:,12]
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=123)  
+X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2, random_state=123)   
+# train, validation = train_test_split(data_clean, test_size=0.2)
+
+# X_val = validation.iloc[:,0:12]
+# Y_val = validation.iloc[:,12]
+# X_train = train.iloc[:,0:12]
+# Y_train = train.iloc[:,12]
 ```
+
+## Refit the Model and Reevaluate
+
+Great! Now refit the model and once again assess it's performance on the training and validation sets.
 
 
 ```python
-#Code provided; building an initial model
 np.random.seed(123)
 model = Sequential()
 model.add(layers.Dense(8, input_dim=12, activation='relu'))
@@ -309,7 +377,7 @@ hist.history['loss'][:10]
 
 
 
-Did you see what happend? all the values for training and validation loss are "nan". There could be several reasons for that, but as we already mentioned there is likely a vanishing or exploding gradient problem. recall that we normalized out inputs. But how about the outputs? Let's have a look.
+> Note that you still haven't achieved convergence! From here, it's time to normalize the output data.
 
 
 ```python
@@ -319,11 +387,11 @@ Y_train.head()
 
 
 
-    208     54.0
-    290     23.0
-    286     15.0
-    0       79.0
-    401    329.0
+    278    202.0
+    80      86.0
+    20      66.0
+    103     13.0
+    220     86.0
     Name: like, dtype: float64
 
 
@@ -346,12 +414,15 @@ Y = (data["like"]-np.mean(data["like"]))/(np.std(data["like"]))
 #Your code here; create training and validation sets as before. Use random seed 123.
 data_clean = pd.concat([X, Y], axis=1)
 np.random.seed(123)
-train, validation = train_test_split(data_clean, test_size=0.2)
 
-X_val = validation.iloc[:,0:12]
-Y_val = validation.iloc[:,12]
-X_train = train.iloc[:,0:12]
-Y_train = train.iloc[:,12]
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=123)  
+X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2, random_state=123)  
+# train, validation = train_test_split(data_clean, test_size=0.2)
+
+# X_val = validation.iloc[:,0:12]
+# Y_val = validation.iloc[:,12]
+# X_train = train.iloc[:,0:12]
+# Y_train = train.iloc[:,12]
 ```
 
 
@@ -367,30 +438,7 @@ hist = model.fit(X_train, Y_train, batch_size=32,
                  epochs=100, validation_data = (X_val, Y_val), verbose = 0)
 ```
 
-Finally, let's recheck our loss function. Not only should it be populated with numerical data as opposed to null values, but we also should expect to see the loss function decreasing with successive epochs, demonstrating optimization!
-
-
-```python
-hist.history['loss'][:10]
-```
-
-
-
-
-    [1.2408857164960918,
-     1.175498196874002,
-     1.1352486694701995,
-     1.1083890091289172,
-     1.0902567186740915,
-     1.0721662248475383,
-     1.0611894782444444,
-     1.0505248789835457,
-     1.042567062408033,
-     1.0360946251888468]
-
-
-
-Great! We have a converged model. With that, let's investigate how well the model performed with our good old friend, mean squarred error.
+Again, reevaluate the updated model.
 
 
 ```python
@@ -404,15 +452,38 @@ print("MSE_train:", MSE_train)
 print("MSE_val:", MSE_val)
 ```
 
-    MSE_train: 0.9279475664337523
-    MSE_val: 0.9317562611051917
+    MSE_train: 1.0340719824485043
+    MSE_val: 0.9638583875606664
 
+
+
+```python
+hist.history['loss'][:10]
+```
+
+
+
+
+    [1.439053112536334,
+     1.3336541879545436,
+     1.2812423051408168,
+     1.246897012330173,
+     1.2241152392679386,
+     1.2034877556261052,
+     1.1872830351584414,
+     1.1745527371596753,
+     1.1645603426051943,
+     1.1568267743908958]
+
+
+
+Great! Now that you have a converged model, you can also experiment with alternative optimizers and initialization strategies to see if you can find a better global minimum. (After all, the current models may have converged to a local minimum.)
 
 ## Using Weight Initializers
 
-##  He Initialization
+Below, take a look at the code provided to see how to modify the neural network to use alternative initialization and optimization strategies. At the end, you'll then be asked to select the model which you believe is the strongest.
 
-Let's try and use a weight initializer. In the lecture, we've seen the He normalizer, which initializes the weight vector to have an average 0 and a variance of 2/n, with $n$ the number of features feeding into a layer.
+##  He Initialization
 
 
 ```python
@@ -442,11 +513,9 @@ print(MSE_train)
 print(MSE_val)
 ```
 
-    0.9266351379758461
-    0.9474339752163196
+    1.0392949820359312
+    0.8658544030836142
 
-
-The initializer does not really help us to decrease the MSE. We know that initializers can be particularly helpful in deeper networks, and our network isn't very deep. What if we use the `Lecun` initializer with a `tanh` activation?
 
 ## Lecun Initialization
 
@@ -478,8 +547,8 @@ print(MSE_train)
 print(MSE_val)
 ```
 
-    0.9274710945931817
-    0.9463006239264359
+    1.0307351124941144
+    0.9292005788570431
 
 
 Not much of a difference, but a useful note to consider when tuning your network. Next, let's investigate the impace of various optimization algorithms.
@@ -513,8 +582,8 @@ print(MSE_train)
 print(MSE_val)
 ```
 
-    0.914450642739685
-    0.9437157484784983
+    1.020200641136699
+    0.9421919606123765
 
 
 ## Adam
@@ -546,8 +615,8 @@ print(MSE_train)
 print(MSE_val)
 ```
 
-    0.9113685285012638
-    0.9444777470972421
+    1.0219766410555322
+    0.9477664629838952
 
 
 ## Learning Rate Decay with Momentum
@@ -581,26 +650,46 @@ print(MSE_train)
 print(MSE_val)
 ```
 
-    0.8188327426055082
-    0.9218409795298302
+    0.8667952792265361
+    1.1040802536956849
 
 
-## Additional Resources
-* https://github.com/susanli2016/Machine-Learning-with-Python/blob/master/Consumer_complaints.ipynb  
+## Selecting a Final Model
 
-* https://catalog.data.gov/dataset/consumer-complaint-database  
+Now, select the model with the best performance based on the training and validation sets. Evaluate this top model using the test set!
 
-* https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/  
 
-* https://machinelearningmastery.com/grid-search-hyperparameters-deep-learning-models-python-keras/  
+```python
+#Your code here
+np.random.seed(123)
+model = Sequential()
+model.add(layers.Dense(8, input_dim=12, kernel_initializer= "he_normal",
+                activation='relu'))
+model.add(layers.Dense(1, activation = 'linear'))
 
-* https://machinelearningmastery.com/regression-tutorial-keras-deep-learning-library-python/  
+model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
+hist = model.fit(X_train, Y_train, batch_size=32, 
+                 epochs=100, validation_data = (X_val, Y_val),verbose=0)
 
-* https://stackoverflow.com/questions/37232782/nan-loss-when-training-regression-network  
+pred_train = model.predict(X_train).reshape(-1)
+pred_val = model.predict(X_val).reshape(-1)
 
-* https://machinelearningmastery.com/grid-search-hyperparameters-deep-learning-models-python-keras/
+MSE_train = np.mean((pred_train-Y_train)**2)
+MSE_val = np.mean((pred_val-Y_val)**2)
+
+pred_test = model.predict(X_test).reshape(-1)
+MSE_test = np.mean((pred_test-Y_test)**2)
+
+print(MSE_train)
+print(MSE_val)
+print(MSE_test)
+```
+
+    1.0391711439058289
+    0.8659758456727069
+    0.17878674871641423
 
 
 ## Summary  
 
-In this lab, we began to practice some of the concepts regarding normalization and optimization for neural networks. In the final lab for this section, you'll independently practice these concepts on your own in order to tune a model to predict individuals payments to loans.
+In this lab, you worked to ensure your model converged properly. Additionally, you also investigated the impact of varying initialization and optimization routines.
