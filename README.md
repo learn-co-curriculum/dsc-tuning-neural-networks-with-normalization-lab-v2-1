@@ -9,7 +9,7 @@ It is worth noting that getting regression to work with neural networks can be d
 
 ## Objectives
 You will be able to:
-* Build a nueral network using keras
+* Build a neural network using Keras
 * Normalize your data to assist algorithm convergence
 * Implement and observe the impact of various initialization techniques
 
@@ -37,7 +37,7 @@ from sklearn.model_selection import train_test_split
 
 ## Loading the data
 
-The data we'll be working with is data related to facebook posts published during the year of 2014 on the Facebook's page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
+The data we'll be working with is data related to facebook posts published during the year of 2014 on the facebook page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
 
 First, let's import the data set and delete any rows with missing data. Afterwards, briefly preview the data.
 
@@ -308,7 +308,7 @@ hist.history['loss'][:10]
 
 
 
-> Notice this extremely problematic behaviour: all the values for training and validation loss are "nan". This indicates that the algorithm did not converge. The first solution to this is to normalize the input. From there, if convergence is not achieved, normalizing the output may also be required.
+> Notice this extremely problematic behavior: all the values for training and validation loss are "nan". This indicates that the algorithm did not converge. The first solution to this is to normalize the input. From there, if convergence is not achieved, normalizing the output may also be required.
 
 ## Normalize the Input Data
 
@@ -530,7 +530,7 @@ print(MSE_val)
     0.9292005788570431
 
 
-Not much of a difference, but a useful note to consider when tuning your network. Next, let's investigate the impace of various optimization algorithms.
+Not much of a difference, but a useful note to consider when tuning your network. Next, let's investigate the impact of various optimization algorithms.
 
 ## RMSprop
 
