@@ -37,9 +37,9 @@ from sklearn.model_selection import train_test_split
 
 ## Loading the data
 
-The data we'll be working with is data related to facebook posts published during the year of 2014 on the facebook page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
+The data we'll be working with is data related to Facebook posts published during the year of 2014 on the Facebook page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
 
-First, let's import the data set and delete any rows with missing data. Afterwards, briefly preview the data.
+First, let's import the data set, `dataset_Facebook.csv`, and delete any rows with missing data. Afterwards, briefly preview the data.
 
 
 ```python
