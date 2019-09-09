@@ -60,9 +60,9 @@ from sklearn.model_selection import train_test_split
 
 ## Loading the data
 
-The data we'll be working with is data related to facebook posts published during the year of 2014 on the facebook page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
+The data we'll be working with is data related to Facebook posts published during the year of 2014 on the Facebook page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
 
-First, let's import the data set and delete any rows with missing data. Afterwards, briefly preview the data.
+First, let's import the data set, `dataset_Facebook.csv`, and delete any rows with missing data. Afterwards, briefly preview the data.
 
 
 ```python
@@ -274,8 +274,8 @@ X5 = data["Post Hour"]
 X6 = data["Paid"]
 
 ## Even for a baseline model some preprocessing may be required (all inputs must be numerical features)
-dummy_X1= pd.get_dummies(X1)
-dummy_X2= pd.get_dummies(X2)
+dummy_X1= pd.get_dummies(X1, drop_first=True)
+dummy_X2= pd.get_dummies(X2, drop_first=True)
 
 X = pd.concat([X0, dummy_X1, dummy_X2, X3, X4, X5, X6], axis=1)
 
@@ -289,10 +289,10 @@ X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.
 
 # train, validation = train_test_split(data_clean, test_size=0.2)
 
-# X_val = validation.iloc[:,0:12]
-# Y_val = validation.iloc[:,12]
-# X_train = train.iloc[:,0:12]
-# Y_train = train.iloc[:,12]
+# X_val = validation.iloc[:,0:10]
+# Y_val = validation.iloc[:,10]
+# X_train = train.iloc[:,0:10]
+# Y_train = train.iloc[:,10]
 ```
 
 ## Building a Baseline Model
