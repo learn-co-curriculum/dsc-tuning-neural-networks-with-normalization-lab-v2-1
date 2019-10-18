@@ -268,7 +268,7 @@ Next, build a naive baseline model to compare performance against is a helpful r
 ```python
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(8, input_dim=10, activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
 model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
@@ -356,7 +356,7 @@ Great! Now refit the model and once again assess it's performance on the trainin
 ```python
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(8, input_dim=10, activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
 model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
@@ -409,7 +409,7 @@ X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.
 #Your code here; rebuild a simple model using a relu layer followed by a linear layer. (See our code snippet above!)
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(8, input_dim=10, activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
 model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
@@ -468,7 +468,7 @@ Below, take a look at the code provided to see how to modify the neural network 
 ```python
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, kernel_initializer= "he_normal",
+model.add(layers.Dense(8, input_dim=10, kernel_initializer= "he_normal",
                 activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
@@ -502,7 +502,7 @@ print(MSE_val)
 ```python
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, 
+model.add(layers.Dense(8, input_dim=10, 
                 kernel_initializer= "lecun_normal", activation='tanh'))
 model.add(layers.Dense(1, activation = 'linear'))
 
@@ -538,7 +538,7 @@ Not much of a difference, but a useful note to consider when tuning your network
 ```python
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(8, input_dim=10, activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
 model.compile(optimizer= "rmsprop" ,loss='mse',metrics=['mse'])
@@ -571,7 +571,7 @@ print(MSE_val)
 ```python
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(8, input_dim=10, activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
 model.compile(optimizer= "Adam" ,loss='mse',metrics=['mse'])
@@ -606,7 +606,7 @@ print(MSE_val)
 np.random.seed(123)
 sgd = optimizers.SGD(lr=0.03, decay=0.0001, momentum=0.9)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, activation='relu'))
+model.add(layers.Dense(8, input_dim=10, activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
 model.compile(optimizer= sgd ,loss='mse',metrics=['mse'])
@@ -642,7 +642,7 @@ Now, select the model with the best performance based on the training and valida
 #Your code here
 np.random.seed(123)
 model = Sequential()
-model.add(layers.Dense(8, input_dim=12, kernel_initializer= "he_normal",
+model.add(layers.Dense(8, input_dim=10, kernel_initializer= "he_normal",
                 activation='relu'))
 model.add(layers.Dense(1, activation = 'linear'))
 
