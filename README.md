@@ -1,347 +1,489 @@
 
-# Tuning Neural Networks with Normalization - Lab
+# Tuning Neural Networks with Normalization - Lab 
 
 ## Introduction
 
-For this lab on initialization and optimization, you'll build a neural network to perform a regression task.
+In this lab you'll build a neural network to perform a regression task.
 
-It is worth noting that getting regression to work with neural networks can be difficult because the output is unbounded ($\hat y$ can technically range from $-\infty$ to $+\infty$, and the models are especially prone to exploding gradients. This issue makes a regression exercise the perfect learning case for tinkering with normalization and optimization strategies to ensure proper convergence!
+It is worth noting that getting regression to work with neural networks can be comparatively difficult because the output is unbounded ($\hat y$ can technically range from $-\infty$ to $+\infty$), and the models are especially prone to exploding gradients. This issue makes a regression exercise the perfect learning case for tinkering with normalization and optimization strategies to ensure proper convergence!
 
 ## Objectives
-You will be able to:
-* Build a neural network using Keras
-* Normalize your data to assist algorithm convergence
-* Implement and observe the impact of various initialization techniques
+
+In this lab you will: 
+
+- Fit a neural network to normalized data 
+- Implement and observe the impact of various initialization techniques 
+- Implement and observe the impact of various optimization techniques 
+
+## Load the data 
+
+First, run the following cell to import all the neccessary libraries and classes you will need in this lab. 
 
 
 ```python
+# Necessary libraries and classes
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
 from keras import initializers
 from keras import layers
-from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn import preprocessing
+from sklearn.metrics import mean_squared_error
 from keras import optimizers
 from sklearn.model_selection import train_test_split
+
+import warnings
+warnings.filterwarnings('ignore')
 ```
 
-    /Users/matthew.mitchell/anaconda3/lib/python3.6/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
-      from ._conv import register_converters as _register_converters
-    Using TensorFlow backend.
+In this lab, you'll be working with the housing prices data you saw in an earlier section. However, we did a lot of preprocessing for you so you can focus on normalizing numeric features and building neural network models! The following preprocessing steps were taken (all the code can be found in the `data_preprocessing.ipynb` notebook in this repository): 
 
+- The data was split into the training, validate, and test sets 
+- All the missing values in numeric columns were replaced by the median of those columns 
+- All the missing values in catetgorical columns were replaced with the word 'missing' 
+- All the categorical columns were one-hot encoded 
 
-## Loading the data
-
-The data we'll be working with is data related to Facebook posts published during the year of 2014 on the Facebook page of a renowned cosmetics brand.  It includes 7 features known prior to post publication, and 12 features for evaluating the post impact. What we want to do is make a predictor for the number of "likes" for a post, taking into account the 7 features prior to posting.
-
-First, let's import the data set, `dataset_Facebook.csv`, and delete any rows with missing data. Afterwards, briefly preview the data.
+Run the following cells to import the train, validate, and test sets:  
 
 
 ```python
-#Your code here; load the dataset and drop rows with missing values. Then preview the data.
+# Load all numeric features
+X_train_numeric = pd.read_csv('data/X_train_numeric.csv')
+X_val_numeric = pd.read_csv('data/X_val_numeric.csv')
+X_test_numeric = pd.read_csv('data/X_test_numeric.csv')
+
+# Load all categorical features
+X_train_cat = pd.read_csv('data/X_train_cat.csv')
+X_val_cat = pd.read_csv('data/X_val_cat.csv')
+X_test_cat = pd.read_csv('data/X_test_cat.csv')
+
+# Load all targets
+y_train = pd.read_csv('data/y_train.csv')
+y_val = pd.read_csv('data/y_val.csv')
+y_test = pd.read_csv('data/y_test.csv')
 ```
-
-## Defining the Problem
-
-Define X and Y and perform a train-validation-test split.
-
-X will be:
-* Page total likes
-* Post Month
-* Post Weekday
-* Post Hour
-* Paid
-along with dummy variables for:
-* Type
-* Category
-
-Y will be the `like` column.
 
 
 ```python
-#Your code here; define the problem.
+# Combine all features
+X_train = pd.concat([X_train_numeric, X_train_cat], axis=1)
+X_val = pd.concat([X_val_numeric, X_val_cat], axis=1)
+X_test = pd.concat([X_test_numeric, X_test_cat], axis=1)
+
+# Number of features
+n_features = X_train.shape[1]
 ```
 
-## Building a Baseline Model
-
-Next, build a naive baseline model to compare performance against is a helpful reference point. From there, you can then observe the impact of various tunning procedures which will iteratively improve your model.
+As a refresher, preview the training data: 
 
 
 ```python
-#Simply run this code block, later you'll modify this model to tune the performance
+# Preview the data
+X_train.head()
+```
+
+## Build a Baseline Model
+
+Building a naive baseline model to compare performance against is a helpful reference point. From there, you can then observe the impact of various tunning procedures which will iteratively improve your model. So, let's do just that! 
+
+In the cell below: 
+
+- Add an input layer with `n_features` units 
+- Add two hidden layers, one with 100 and the other with 50 units (make sure you use the `'relu'` activation function) 
+- Add an output layer with 1 unit and `'linear'` activation 
+- Compile and fit the model 
+
+
+```python
 np.random.seed(123)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=10, activation='relu'))
-model.add(layers.Dense(1, activation = 'linear'))
+baseline_model = Sequential()
 
-model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val), verbose=0)
+# Hidden layer with 100 units
+
+
+# Hidden layer with 50 units
+
+
+# Output layer
+
+
+# Compile the model
+baseline_model.compile(optimizer='SGD', 
+                       loss='mse', 
+                       metrics=['mse'])
+
+# Train the model
+baseline_model.fit(X_train, 
+                   y_train, 
+                   batch_size=32, 
+                   epochs=150, 
+                   validation_data=(X_val, y_val))
 ```
 
-### Evaluating the Baseline
+> _**Notice this extremely problematic behavior: all the values for training and validation loss are "nan". This indicates that the algorithm did not converge. The first solution to this is to normalize the input. From there, if convergence is not achieved, normalizing the output may also be required.**_ 
 
-Evaluate the baseline model for the training and validation sets.
+## Normalize the Input Data 
+
+It's now time to normalize the input data. In the cell below: 
+
+- Assign the column names of all numeric columns to `numeric_columns` 
+- Instantiate a `StandardScaler` 
+- Fit and transform `X_train_numeric`. Make sure you convert the result into a DataFrame (use `numeric_columns` as the column names) 
+- Transform validate and test sets (`X_val_numeric` and `X_test_numeric`), and convert these results into DataFrames as well 
+- Use the provided to combine the scaled numerical and categorical features 
 
 
 ```python
-#Your code here; evaluate the model with MSE
+# Numeric column names
+numeric_columns = None 
+
+# Instantiate StandardScaler
+ss_X = None
+
+# Fit and transform train data
+X_train_scaled = None
+
+# Transform validate and test data
+X_val_scaled = None
+X_test_scaled = None
+
+# Combine the scaled numerical features and categorical features
+X_train = pd.concat([X_train_scaled, X_train_cat], axis=1)
+X_val = pd.concat([X_val_scaled, X_val_cat], axis=1)
+X_test = pd.concat([X_test_scaled, X_test_cat], axis=1)
 ```
+
+Now run the following cell to compile a neural network model (with the same architecture as before): 
 
 
 ```python
-#Your code here; inspect the loss function through the history object
+# Model with all normalized inputs
+np.random.seed(123)
+normalized_input_model = Sequential()
+normalized_input_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+normalized_input_model.add(layers.Dense(50, activation='relu'))
+normalized_input_model.add(layers.Dense(1, activation='linear'))
+
+# Compile the model
+normalized_input_model.compile(optimizer='SGD', 
+                               loss='mse', 
+                               metrics=['mse'])
 ```
 
-> Notice this extremely problematic behavior: all the values for training and validation loss are "nan". This indicates that the algorithm did not converge. The first solution to this is to normalize the input. From there, if convergence is not achieved, normalizing the output may also be required.
-
-## Normalize the Input Data
-
-Normalize the input features by subtracting each feature mean and dividing by the standard deviation in order to transform each into a standard normal distribution. Then recreate the train-validate-test sets with the transformed input data.
+In the cell below: 
+- Train the `normalized_input_model` on normalized input (`X_train`) and output (`y_train`) 
+- Set a batch size of 32 and train for 150 epochs 
+- Specify the `validation_data` argument as `(X_val, y_val)` 
 
 
 ```python
-## standardize/categorize
+# Train the model 
+
 ```
 
-## Refit the Model and Reevaluate
-
-Great! Now refit the model and once again assess it's performance on the training and validation sets.
-
-
-```python
-#Your code here; refit a model as shown above
-```
-
-
-```python
-#Rexamine the loss function
-```
-
-> Note that you still haven't achieved convergence! From here, it's time to normalize the output data.
+> _**Note that you still haven't achieved convergence! From here, it's time to normalize the output data.**_
 
 ## Normalizing the output
 
-Normalize Y as you did X by subtracting the mean and dividing by the standard deviation. Then, resplit the data into training and validation sets as we demonstrated above, and retrain a new model using your normalized X and Y data.
+Again, use `StandardScaler()` to: 
+
+- Fit and transform `y_train` 
+- Transform `y_val` and `y_test` 
 
 
 ```python
-#Your code here: redefine Y after normalizing the data.
+# Instantiate StandardScaler
+ss_y = None
+
+# Fit and transform train labels
+y_train_scaled = None
+
+# Transform validate and test labels
+y_val_scaled = None
+y_test_scaled = None
 ```
+
+In the cell below: 
+- Train the `normalized_model` on normalized input (`X_train`) and output (`y_train_scaled`) 
+- Set a batch size of 32 and train for 150 epochs 
+- Specify the `validation_data` as `(X_val, y_val_scaled)` 
 
 
 ```python
-#Your code here; create training and validation sets as before. Use random seed 123.
+# Model with all normalized inputs and outputs
+np.random.seed(123)
+normalized_model = Sequential()
+normalized_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+normalized_model.add(layers.Dense(50, activation='relu'))
+normalized_model.add(layers.Dense(1, activation='linear'))
+
+# Compile the model
+normalized_model.compile(optimizer='SGD', 
+                         loss='mse', 
+                         metrics=['mse']) 
+
+# Train the model
+
 ```
+
+Nicely done! After normalizing both the input and output, the model finally converged. 
+
+- Evaluate the model (`normalized_model`) on training data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-#Your code here; rebuild a simple model using a relu layer followed by a linear layer. (See our code snippet above!)
+# Evaluate the model on training data
+
 ```
 
-Again, reevaluate the updated model.
+- Evaluate the model (`normalized_model`) on validate data (`X_val` and `y_val_scaled`) 
 
 
 ```python
-#Your code here; MSE
+# Evaluate the model on validate data
+
 ```
+
+Since the output is normalized, the metric above is not interpretable. To remedy this: 
+
+- Generate predictions on validate data (`X_val`) 
+- Transform these predictions back to original scale using `ss_y` 
+- Now you can calculate the RMSE in the original units with `y_val` and `y_val_pred` 
 
 
 ```python
-#Your code here; loss function
+# Generate predictions on validate data
+y_val_pred_scaled = None
+
+# Transform the predictions back to original scale
+y_val_pred = None
+
+# RMSE of validate data
+
 ```
 
-Great! Now that you have a converged model, you can also experiment with alternative optimizers and initialization strategies to see if you can find a better global minimum. (After all, the current models may have converged to a local minimum.)
+Great! Now that you have a converged model, you can also experiment with alternative optimizers and initialization strategies to see if you can find a better global minimum. (After all, the current models may have converged to a local minimum.) 
 
 ## Using Weight Initializers
 
-Below, take a look at the code provided to see how to modify the neural network to use alternative initialization and optimization strategies. At the end, you'll then be asked to select the model which you believe is the strongest.
+In this section you will to use alternative initialization and optimization strategies. At the end, you'll then be asked to select the model which you believe performs the best.  
 
 ##  He Initialization
 
-
-```python
-np.random.seed(123)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=10, kernel_initializer= "he_normal",
-                activation='relu'))
-model.add(layers.Dense(1, activation = 'linear'))
-
-model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val),verbose=0)
-```
-
-
-```python
-pred_train = model.predict(X_train).reshape(-1)
-pred_val = model.predict(X_val).reshape(-1)
-
-MSE_train = np.mean((pred_train-Y_train)**2)
-MSE_val = np.mean((pred_val-Y_val)**2)
-```
-
-
-```python
-print(MSE_train)
-print(MSE_val)
-```
-
-    1.0392949820359312
-    0.8658544030836142
-
-
-## Lecun Initialization
+In the cell below, sepcify the following in the first hidden layer:  
+  - 100 units 
+  - `'relu'` activation 
+  - `input_shape` 
+  - `kernel_initializer='he_normal'`  
 
 
 ```python
 np.random.seed(123)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=10, 
-                kernel_initializer= "lecun_normal", activation='tanh'))
-model.add(layers.Dense(1, activation = 'linear'))
+he_model = Sequential()
 
-model.compile(optimizer= "sgd" ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val), verbose=0)
+# Add the first hidden layer
+
+
+# Add another hidden layer
+he_model.add(layers.Dense(50, activation='relu'))
+
+# Add an output layer
+he_model.add(layers.Dense(1, activation='linear'))
+
+# Compile the model
+he_model.compile(optimizer='SGD', 
+                 loss='mse', 
+                 metrics=['mse'])
+
+# Train the model
+he_model.fit(X_train, 
+             y_train_scaled, 
+             batch_size=32, 
+             epochs=150, 
+             validation_data=(X_val, y_val_scaled))
 ```
+
+Evaluate the model (`he_model`) on training data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-pred_train = model.predict(X_train).reshape(-1)
-pred_val = model.predict(X_val).reshape(-1)
+# Evaluate the model on training data
 
-MSE_train = np.mean((pred_train-Y_train)**2)
-MSE_val = np.mean((pred_val-Y_val)**2)
 ```
+
+Evaluate the model (`he_model`) on validate data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-print(MSE_train)
-print(MSE_val)
+# Evaluate the model on validate data
+
 ```
 
-    1.0307351124941144
-    0.9292005788570431
+## Lecun Initialization 
 
+In the cell below, sepcify the following in the first hidden layer:  
+  - 100 units 
+  - `'relu'` activation 
+  - `input_shape` 
+  - `kernel_initializer='lecun_normal'` 
+
+
+```python
+np.random.seed(123)
+lecun_model = Sequential()
+
+# Add the first hidden layer
+
+
+# Add another hidden layer
+lecun_model.add(layers.Dense(50, activation='relu'))
+
+# Add an output layer
+lecun_model.add(layers.Dense(1, activation='linear'))
+
+# Compile the model
+lecun_model.compile(optimizer='SGD', 
+                    loss='mse', 
+                    metrics=['mse'])
+
+# Train the model
+lecun_model.fit(X_train, 
+                y_train_scaled, 
+                batch_size=32, 
+                epochs=150, 
+                validation_data=(X_val, y_val_scaled))
+```
+
+Evaluate the model (`lecun_model`) on training data (`X_train` and `y_train_scaled`) 
+
+
+```python
+# Evaluate the model on training data
+
+```
+
+Evaluate the model (`lecun_model`) on validate data (`X_train` and `y_train_scaled`) 
+
+
+```python
+# Evaluate the model on validate data
+
+```
 
 Not much of a difference, but a useful note to consider when tuning your network. Next, let's investigate the impact of various optimization algorithms.
 
-## RMSprop
+## RMSprop 
+
+Compile the `rmsprop_model` with: 
+
+- `'rmsprop'` as the optimizer 
+- track `'mse'` as the loss and metric  
 
 
 ```python
 np.random.seed(123)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=10, activation='relu'))
-model.add(layers.Dense(1, activation = 'linear'))
+rmsprop_model = Sequential()
+rmsprop_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+rmsprop_model.add(layers.Dense(50, activation='relu'))
+rmsprop_model.add(layers.Dense(1, activation='linear'))
 
-model.compile(optimizer= "rmsprop" ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val), verbose = 0)
+# Compile the model
+
+
+# Train the model
+rmsprop_model.fit(X_train, 
+                  y_train_scaled, 
+                  batch_size=32, 
+                  epochs=150, 
+                  validation_data=(X_val, y_val_scaled))
 ```
+
+Evaluate the model (`rmsprop_model`) on training data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-pred_train = model.predict(X_train).reshape(-1)
-pred_val = model.predict(X_val).reshape(-1)
+# Evaluate the model on training data
 
-MSE_train = np.mean((pred_train-Y_train)**2)
-MSE_val = np.mean((pred_val-Y_val)**2)
 ```
+
+Evaluate the model (`rmsprop_model`) on training data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-print(MSE_train)
-print(MSE_val)
+# Evaluate the model on validate data
+
 ```
 
-    1.020200641136699
-    0.9421919606123765
+## Adam 
 
+Compile the `adam_model` with: 
 
-## Adam
-
-
-```python
-np.random.seed(123)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=10, activation='relu'))
-model.add(layers.Dense(1, activation = 'linear'))
-
-model.compile(optimizer= "Adam" ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val), verbose = 0)
-```
-
-
-```python
-pred_train = model.predict(X_train).reshape(-1)
-pred_val = model.predict(X_val).reshape(-1)
-
-MSE_train = np.mean((pred_train-Y_train)**2)
-MSE_val = np.mean((pred_val-Y_val)**2)
-```
-
-
-```python
-print(MSE_train)
-print(MSE_val)
-```
-
-    1.0219766410555322
-    0.9477664629838952
-
-
-## Learning Rate Decay with Momentum
-
+- `'Adam'` as the optimizer 
+- track `'mse'` as the loss and metric  
 
 
 ```python
 np.random.seed(123)
-sgd = optimizers.SGD(lr=0.03, decay=0.0001, momentum=0.9)
-model = Sequential()
-model.add(layers.Dense(8, input_dim=10, activation='relu'))
-model.add(layers.Dense(1, activation = 'linear'))
+adam_model = Sequential()
+adam_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+adam_model.add(layers.Dense(50, activation='relu'))
+adam_model.add(layers.Dense(1, activation='linear'))
 
-model.compile(optimizer= sgd ,loss='mse',metrics=['mse'])
-hist = model.fit(X_train, Y_train, batch_size=32, 
-                 epochs=100, validation_data = (X_val, Y_val), verbose = 0)
+# Compile the model
+
+
+# Train the model
+adam_model.fit(X_train, 
+               y_train_scaled, 
+               batch_size=32, 
+               epochs=150, 
+               validation_data=(X_val, y_val_scaled))
 ```
+
+Evaluate the model (`adam_model`) on training data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-pred_train = model.predict(X_train).reshape(-1)
-pred_val = model.predict(X_val).reshape(-1)
+# Evaluate the model on training data
 
-MSE_train = np.mean((pred_train-Y_train)**2)
-MSE_val = np.mean((pred_val-Y_val)**2)
 ```
+
+Evaluate the model (`adam_model`) on training data (`X_train` and `y_train_scaled`) 
 
 
 ```python
-print(MSE_train)
-print(MSE_val)
+# Evaluate the model on validate data
+
 ```
 
-    0.8667952792265361
-    1.1040802536956849
-
-
-## Selecting a Final Model
+## Select a Final Model
 
 Now, select the model with the best performance based on the training and validation sets. Evaluate this top model using the test set!
 
 
 ```python
-#Your code here
+# Evaluate the best model on test data
+
+```
+
+As earlier, this metric is hard to interpret because the output is scaled. 
+
+- Generate predictions on test data (`X_test`) 
+- Transform these predictions back to original scale using `ss_y` 
+- Now you can calculate the RMSE in the original units with `y_test` and `y_test_pred` 
+
+
+```python
+# Generate predictions on test data
+y_test_pred_scaled = None
+
+# Transform the predictions back to original scale
+y_test_pred = None
+
+# MSE of test data
+
 ```
 
 ## Summary  
 
-In this lab, you worked to ensure your model converged properly. Additionally, you also investigated the impact of varying initialization and optimization routines.
+In this lab, you worked to ensure your model converged properly by normalizing both the input and output. Additionally, you also investigated the impact of varying initialization and optimization routines.
