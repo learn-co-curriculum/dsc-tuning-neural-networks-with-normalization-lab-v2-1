@@ -1,4 +1,3 @@
-
 # Tuning Neural Networks with Normalization - Lab 
 
 ## Introduction
@@ -49,29 +48,26 @@ Run the following cells to import the train, validate, and test sets:
 ```python
 # Load all numeric features
 X_train_numeric = pd.read_csv('data/X_train_numeric.csv')
-X_val_numeric = pd.read_csv('data/X_val_numeric.csv')
 X_test_numeric = pd.read_csv('data/X_test_numeric.csv')
+X_val_numeric = pd.read_csv('data/X_val_numeric.csv')
 
 # Load all categorical features
 X_train_cat = pd.read_csv('data/X_train_cat.csv')
-X_val_cat = pd.read_csv('data/X_val_cat.csv')
 X_test_cat = pd.read_csv('data/X_test_cat.csv')
+X_val_cat = pd.read_csv('data/X_val_cat.csv')
 
 # Load all targets
 y_train = pd.read_csv('data/y_train.csv')
-y_val = pd.read_csv('data/y_val.csv')
 y_test = pd.read_csv('data/y_test.csv')
+y_val = pd.read_csv('data/y_val.csv')
 ```
 
 
 ```python
 # Combine all features
-X_train = pd.concat([X_train_numeric, X_train_cat], axis=1)
-X_val = pd.concat([X_val_numeric, X_val_cat], axis=1)
-X_test = pd.concat([X_test_numeric, X_test_cat], axis=1)
-
-# Number of features
-n_features = X_train.shape[1]
+X_train = None
+X_val = None
+X_test = None
 ```
 
 As a refresher, preview the training data: 
@@ -92,6 +88,12 @@ In the cell below:
 - Add two hidden layers, one with 100 and the other with 50 units (make sure you use the `'relu'` activation function) 
 - Add an output layer with 1 unit and `'linear'` activation 
 - Compile and fit the model 
+
+
+```python
+n_features = (X_train.shape[1],)
+print(n_features)
+```
 
 
 ```python
@@ -160,7 +162,7 @@ Now run the following cell to compile a neural network model (with the same arch
 # Model with all normalized inputs
 np.random.seed(123)
 normalized_input_model = Sequential()
-normalized_input_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+normalized_input_model.add(layers.Dense(100, activation='relu', input_shape=n_features))
 normalized_input_model.add(layers.Dense(50, activation='relu'))
 normalized_input_model.add(layers.Dense(1, activation='linear'))
 
@@ -177,7 +179,8 @@ In the cell below:
 
 
 ```python
-# Train the model 
+# Train the model
+
 
 ```
 
@@ -223,7 +226,6 @@ normalized_model.compile(optimizer='SGD',
                          metrics=['mse']) 
 
 # Train the model
-
 ```
 
 Nicely done! After normalizing both the input and output, the model finally converged. 
@@ -233,16 +235,9 @@ Nicely done! After normalizing both the input and output, the model finally conv
 
 ```python
 # Evaluate the model on training data
-
 ```
 
 - Evaluate the model (`normalized_model`) on validate data (`X_val` and `y_val_scaled`) 
-
-
-```python
-# Evaluate the model on validate data
-
-```
 
 Since the output is normalized, the metric above is not interpretable. To remedy this: 
 
@@ -259,7 +254,6 @@ y_val_pred_scaled = None
 y_val_pred = None
 
 # RMSE of validate data
-
 ```
 
 Great! Now that you have a converged model, you can also experiment with alternative optimizers and initialization strategies to see if you can find a better global minimum. (After all, the current models may have converged to a local minimum.) 
@@ -291,16 +285,8 @@ he_model.add(layers.Dense(50, activation='relu'))
 he_model.add(layers.Dense(1, activation='linear'))
 
 # Compile the model
-he_model.compile(optimizer='SGD', 
-                 loss='mse', 
-                 metrics=['mse'])
 
 # Train the model
-he_model.fit(X_train, 
-             y_train_scaled, 
-             batch_size=32, 
-             epochs=150, 
-             validation_data=(X_val, y_val_scaled))
 ```
 
 Evaluate the model (`he_model`) on training data (`X_train` and `y_train_scaled`) 
@@ -311,7 +297,7 @@ Evaluate the model (`he_model`) on training data (`X_train` and `y_train_scaled`
 
 ```
 
-Evaluate the model (`he_model`) on validate data (`X_train` and `y_train_scaled`) 
+Evaluate the model (`he_model`) on validate data (`X_val` and `y_val_scaled`)
 
 
 ```python
@@ -333,7 +319,7 @@ np.random.seed(123)
 lecun_model = Sequential()
 
 # Add the first hidden layer
-
+lecun_model.add(layers.Dense(100, kernel_initializer='lecun_normal', activation='relu', input_shape=n_features))
 
 # Add another hidden layer
 lecun_model.add(layers.Dense(50, activation='relu'))
@@ -342,9 +328,7 @@ lecun_model.add(layers.Dense(50, activation='relu'))
 lecun_model.add(layers.Dense(1, activation='linear'))
 
 # Compile the model
-lecun_model.compile(optimizer='SGD', 
-                    loss='mse', 
-                    metrics=['mse'])
+
 
 # Train the model
 lecun_model.fit(X_train, 
@@ -359,7 +343,6 @@ Evaluate the model (`lecun_model`) on training data (`X_train` and `y_train_scal
 
 ```python
 # Evaluate the model on training data
-
 ```
 
 Evaluate the model (`lecun_model`) on validate data (`X_train` and `y_train_scaled`) 
@@ -367,7 +350,6 @@ Evaluate the model (`lecun_model`) on validate data (`X_train` and `y_train_scal
 
 ```python
 # Evaluate the model on validate data
-
 ```
 
 Not much of a difference, but a useful note to consider when tuning your network. Next, let's investigate the impact of various optimization algorithms.
@@ -383,7 +365,7 @@ Compile the `rmsprop_model` with:
 ```python
 np.random.seed(123)
 rmsprop_model = Sequential()
-rmsprop_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+rmsprop_model.add(layers.Dense(100, activation='relu', input_shape=n_features))
 rmsprop_model.add(layers.Dense(50, activation='relu'))
 rmsprop_model.add(layers.Dense(1, activation='linear'))
 
@@ -403,15 +385,13 @@ Evaluate the model (`rmsprop_model`) on training data (`X_train` and `y_train_sc
 
 ```python
 # Evaluate the model on training data
-
 ```
 
-Evaluate the model (`rmsprop_model`) on training data (`X_train` and `y_train_scaled`) 
+Evaluate the model (`rmsprop_model`) on training data (`X_val` and `y_val_scaled`) 
 
 
 ```python
 # Evaluate the model on validate data
-
 ```
 
 ## Adam 
@@ -425,7 +405,7 @@ Compile the `adam_model` with:
 ```python
 np.random.seed(123)
 adam_model = Sequential()
-adam_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+adam_model.add(layers.Dense(100, activation='relu', input_shape=n_features))
 adam_model.add(layers.Dense(50, activation='relu'))
 adam_model.add(layers.Dense(1, activation='linear'))
 
@@ -445,15 +425,13 @@ Evaluate the model (`adam_model`) on training data (`X_train` and `y_train_scale
 
 ```python
 # Evaluate the model on training data
-
 ```
 
-Evaluate the model (`adam_model`) on training data (`X_train` and `y_train_scaled`) 
+Evaluate the model (`adam_model`) on training data (`X_val` and `y_val_scaled`) 
 
 
 ```python
 # Evaluate the model on validate data
-
 ```
 
 ## Select a Final Model
