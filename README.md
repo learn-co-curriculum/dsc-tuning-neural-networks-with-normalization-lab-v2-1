@@ -89,6 +89,8 @@ In the cell below:
 - Add an output layer with 1 unit and `'linear'` activation 
 - Compile and fit the model 
 
+Here, we're calling .shape on our training data so that we can use the result as n_features, so we know how big to make our input layer.
+
 
 ```python
 n_features = (X_train.shape[1],)
@@ -216,7 +218,7 @@ In the cell below:
 # Model with all normalized inputs and outputs
 np.random.seed(123)
 normalized_model = Sequential()
-normalized_model.add(layers.Dense(100, activation='relu', input_shape=(n_features,)))
+normalized_model.add(layers.Dense(100, activation='relu', input_shape=(n_features)))
 normalized_model.add(layers.Dense(50, activation='relu'))
 normalized_model.add(layers.Dense(1, activation='linear'))
 
