@@ -93,12 +93,18 @@ Here, we're calling .shape on our training data so that we can use the result as
 
 
 ```python
+# How big input layer?
 n_features = (X_train.shape[1],)
 print(n_features)
 ```
 
+Create your baseline model. Yo will notice is exihibits strange behavior.
+
+*Note:* When you run this model or other models later on, you may get a comment from tf letting you about optimizing your GPU
+
 
 ```python
+# Baseline model
 np.random.seed(123)
 baseline_model = Sequential()
 
@@ -178,11 +184,11 @@ In the cell below:
 - Train the `normalized_input_model` on normalized input (`X_train`) and output (`y_train`) 
 - Set a batch size of 32 and train for 150 epochs 
 - Specify the `validation_data` argument as `(X_val, y_val)` 
+Again, you may get some strange behavior.
 
 
 ```python
 # Train the model
-
 
 ```
 
@@ -228,6 +234,7 @@ normalized_model.compile(optimizer='SGD',
                          metrics=['mse']) 
 
 # Train the model
+
 ```
 
 Nicely done! After normalizing both the input and output, the model finally converged. 
@@ -237,9 +244,16 @@ Nicely done! After normalizing both the input and output, the model finally conv
 
 ```python
 # Evaluate the model on training data
+
 ```
 
 - Evaluate the model (`normalized_model`) on validate data (`X_val` and `y_val_scaled`) 
+
+
+```python
+# Evaluate the model on validate data
+
+```
 
 Since the output is normalized, the metric above is not interpretable. To remedy this: 
 
@@ -258,7 +272,7 @@ y_val_pred = None
 # RMSE of validate data
 ```
 
-Great! Now that you have a converged model, you can also experiment with alternative optimizers and initialization strategies to see if you can find a better global minimum. (After all, the current models may have converged to a local minimum.) 
+Great. Now that you have a converged model, you can also experiment with alternative optimizers and initialization strategies to see if you can find a better global minimum. (After all, the current models may have converged to a local minimum.) 
 
 ## Using Weight Initializers
 
@@ -270,7 +284,9 @@ In the cell below, sepcify the following in the first hidden layer:
   - 100 units 
   - `'relu'` activation 
   - `input_shape` 
-  - `kernel_initializer='he_normal'`  
+  - `kernel_initializer='he_normal'` 
+  
+[Documentation on the He Normal Initializer](https://www.tensorflow.org/api_docs/python/tf/keras/initializers/HeNormal)
 
 
 ```python
@@ -289,6 +305,7 @@ he_model.add(layers.Dense(1, activation='linear'))
 # Compile the model
 
 # Train the model
+
 ```
 
 Evaluate the model (`he_model`) on training data (`X_train` and `y_train_scaled`) 
@@ -314,6 +331,8 @@ In the cell below, sepcify the following in the first hidden layer:
   - `'relu'` activation 
   - `input_shape` 
   - `kernel_initializer='lecun_normal'` 
+  
+[Documentation on the Lecun Normal Initializer](https://www.tensorflow.org/api_docs/python/tf/keras/initializers/LecunNormal)
 
 
 ```python
@@ -345,6 +364,7 @@ Evaluate the model (`lecun_model`) on training data (`X_train` and `y_train_scal
 
 ```python
 # Evaluate the model on training data
+
 ```
 
 Evaluate the model (`lecun_model`) on validate data (`X_train` and `y_train_scaled`) 
@@ -352,6 +372,7 @@ Evaluate the model (`lecun_model`) on validate data (`X_train` and `y_train_scal
 
 ```python
 # Evaluate the model on validate data
+
 ```
 
 Not much of a difference, but a useful note to consider when tuning your network. Next, let's investigate the impact of various optimization algorithms.
@@ -363,6 +384,8 @@ Compile the `rmsprop_model` with:
 - `'rmsprop'` as the optimizer 
 - track `'mse'` as the loss and metric  
 
+[Documentation on the RMS Prop Optimizer](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/experimental/RMSprop)
+
 
 ```python
 np.random.seed(123)
@@ -372,7 +395,7 @@ rmsprop_model.add(layers.Dense(50, activation='relu'))
 rmsprop_model.add(layers.Dense(1, activation='linear'))
 
 # Compile the model
-
+# Code here
 
 # Train the model
 rmsprop_model.fit(X_train, 
@@ -387,6 +410,7 @@ Evaluate the model (`rmsprop_model`) on training data (`X_train` and `y_train_sc
 
 ```python
 # Evaluate the model on training data
+
 ```
 
 Evaluate the model (`rmsprop_model`) on training data (`X_val` and `y_val_scaled`) 
@@ -394,6 +418,7 @@ Evaluate the model (`rmsprop_model`) on training data (`X_val` and `y_val_scaled
 
 ```python
 # Evaluate the model on validate data
+
 ```
 
 ## Adam 
@@ -401,7 +426,9 @@ Evaluate the model (`rmsprop_model`) on training data (`X_val` and `y_val_scaled
 Compile the `adam_model` with: 
 
 - `'Adam'` as the optimizer 
-- track `'mse'` as the loss and metric  
+- track `'mse'` as the loss and metric
+
+[Documentation on the Adam Optimizer](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam)
 
 
 ```python
@@ -412,7 +439,7 @@ adam_model.add(layers.Dense(50, activation='relu'))
 adam_model.add(layers.Dense(1, activation='linear'))
 
 # Compile the model
-
+# Code here
 
 # Train the model
 adam_model.fit(X_train, 
@@ -427,6 +454,7 @@ Evaluate the model (`adam_model`) on training data (`X_train` and `y_train_scale
 
 ```python
 # Evaluate the model on training data
+
 ```
 
 Evaluate the model (`adam_model`) on training data (`X_val` and `y_val_scaled`) 
@@ -434,6 +462,7 @@ Evaluate the model (`adam_model`) on training data (`X_val` and `y_val_scaled`)
 
 ```python
 # Evaluate the model on validate data
+
 ```
 
 ## Select a Final Model
